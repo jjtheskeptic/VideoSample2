@@ -1,7 +1,7 @@
 # import the necessary packages
 from pyimagesearch.tempimage import TempImage
 #from picamera.array import PiRGBArray
-#from picamera import PiCamera
+#from picamera import PiCamera.
 from imutils.video import VideoStream #JJ
 import argparse
 import warnings

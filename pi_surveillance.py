@@ -1,7 +1,8 @@
 # import the necessary packages
 from pyimagesearch.tempimage import TempImage
-from picamera.array import PiRGBArray
-from picamera import PiCamera
+#from picamera.array import PiRGBArray
+#from picamera import PiCamera
+from imutils.video import VideoStream #JJ
 import argparse
 import warnings
 import datetime
@@ -22,3 +23,21 @@ args = vars(ap.parse_args())
 warnings.filterwarnings("ignore")
 conf = json.load(open(args["conf"]))
 client = None
+
+# check to see if the Dropbox should be used
+if conf["use_dropbox"]:
+    # connect to dropbox and start the session authorization process
+    client = dropbox.Dropbox(conf["dropbox_access_token"])
+    print("[SUCCESS] dropbox account linked")
+# ===============initialize the camera and grab a reference to the raw camera capture
+camera = PiCamera()
+camera.resolution = tuple(conf["resolution"])
+camera.framerate = conf["fps"]
+rawCapture = PiRGBArray(camera, size=tuple(conf["resolution"]))
+# allow the camera to warmup, then initialize the average frame, last
+# uploaded timestamp, and frame motion counter
+print("[INFO] warming up...")
+time.sleep(conf["camera_warmup_time"])
+avg = None
+lastUploaded = datetime.datetime.now()
+motionCounter = 0

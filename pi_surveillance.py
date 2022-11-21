@@ -11,10 +11,12 @@ import imutils
 import json
 import time
 import cv2
-https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
+# https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
 from msrest.authentication import CognitiveServicesCredentials
+import http.client, urllib.request, urllib.parse, urllib.error, base64
+
 
 # construct the argument parser and parse the arguments
 #ap = argparse.ArgumentParser()
@@ -27,12 +29,28 @@ from msrest.authentication import CognitiveServicesCredentials
 warnings.filterwarnings("ignore")
 conf=json.load(open("conf.json"))#conf = json.load(open(args["conf"]))
 client = None
+# https://westus.dev.cognitive.microsoft.com/docs/services//unified-vision-apis-public-preview-2022-10-12-preview/operations/61d65934cd35050c20f73ab6
+headers = {
+    # Request headers
+    'Content-Type': 'application/octet-stream',
+    'Ocp-Apim-Subscription-Key': conf["azure_api_key"],
+}
+params = urllib.parse.urlencode({
+    # Request parameters
+    'features': 'tags',
+    'model-version': 'latest',
+    'language': 'en',
+   # 'smartcrops-aspect-ratios': '{string}',
+})
 
 # check to see if the Dropbox should be used
 if conf["use_dropbox"]:
     # connect to dropbox and start the session authorization process
     client = dropbox.Dropbox(conf["dropbox_access_token"])
     print("[SUCCESS] dropbox account linked")
+
+
+	
 # ===============initialize the camera and grab a reference to the raw camera capture
 #camera = PiCamera()
 #camera.resolution = tuple(conf["resolution"])
@@ -66,7 +84,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 		avg = gray.copy().astype("float")
 		#rawCapture.truncate(0)
 		continue
-
+	print("[INFO] waiting for scene changes...")
 	# accumulate the weighted average between the current frame and
 	# previous frames, then compute the difference between the current
 	# frame and running average
@@ -115,6 +133,30 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
                 # write the image to temporary file
 				t = TempImage()
 				cv2.imwrite(t.path, frame)
+#### AZURE ###
+				# Read file
+				with open(t.path, 'rb') as f:
+					data = f.read()
+				try:
+					conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
+					#conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, "{body}", headers)
+					conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
+					response = conn.getresponse()
+					responseData = response.read()
+					print(responseData)
+					pythonObj=json.loads(responseData)
+					print(pythonObj["tagsResult"])
+					tags=pythonObj["tagsResult"]
+					for object in tags["values"]:
+						print(object["name"], object["confidence"])
+					print("[INFO]:sleeping 5 seconds...")
+					time.sleep(5)
+					conn.close()
+#### END AZURE
+				except Exception as e:
+					print("[Errno {0}] {1}".format(e.errno, e.strerror))
+
+
 
 				# update the last uploaded timestamp and reset the motion
 				# counter

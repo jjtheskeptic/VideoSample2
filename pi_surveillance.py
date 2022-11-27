@@ -84,7 +84,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 		avg = gray.copy().astype("float")
 		#rawCapture.truncate(0)
 		continue
-	print("[INFO] waiting for scene changes...")
+	#qprint("[INFO] waiting for scene changes...")
 	# accumulate the weighted average between the current frame and
 	# previous frames, then compute the difference between the current
 	# frame and running average
@@ -129,12 +129,13 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 			# check to see if the number of frames with consistent motion is
 			# high enough
 			if motionCounter >= conf["min_motion_frames"]:
-				print("[INFO] - MOTION FOUND") # DO SOMETHING
+				#print("[INFO] - MOTION FOUND") # DO SOMETHING
                 # write the image to temporary file
 				t = TempImage()
 				cv2.imwrite(t.path, frame)
 #### AZURE ###
 				# Read file
+				azureStartTime = datetime.datetime.now()
 				with open(t.path, 'rb') as f:
 					data = f.read()
 				try:
@@ -143,14 +144,16 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
 					response = conn.getresponse()
 					responseData = response.read()
-					print(responseData)
+					azureEndTime = datetime.datetime.now()
+					azureSeconds=(azureEndTime-azureStartTime).seconds;
+					#print(responseData)
 					pythonObj=json.loads(responseData)
 					print(pythonObj["tagsResult"])
 					tags=pythonObj["tagsResult"]
 					for object in tags["values"]:
 						print(object["name"], object["confidence"])
-					print("[INFO]:sleeping 5 seconds...")
-					time.sleep(5)
+					print("[INFO]:upload time in seconds",azureSeconds)
+					#time.sleep(5)
 					conn.close()
 #### END AZURE
 				except Exception as e:

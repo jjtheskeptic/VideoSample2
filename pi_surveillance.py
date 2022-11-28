@@ -157,7 +157,8 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					conn.close()
 #### END AZURE
 				except Exception as e:
-					print("[Errno {0}] {1}".format(e.errno, e.strerror))
+					#print("[Errno {0}] {1}".format("e.errno", e.strerror))
+					print("[Errno {0}] {1}".format("error", e))
 
 
 

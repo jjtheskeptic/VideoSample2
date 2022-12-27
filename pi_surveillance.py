@@ -11,7 +11,7 @@ import imutils
 import json
 import time
 import cv2
-#test comment
+#test comment 2
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()

@@ -56,7 +56,7 @@ if conf["use_dropbox"]:
 #camera.resolution = tuple(conf["resolution"])
 #camera.framerate = conf["fps"]
 #rawCapture = PiRGBArray(camera, size=tuple(conf["resolution"]))
-vs=VideoStream(src=1).start() 
+vs=VideoStream(src=2).start() 
 # allow the camera to warmup, then initialize the average frame, last
 # uploaded timestamp, and frame motion counter
 print("[INFO] warming up...")
@@ -64,7 +64,7 @@ time.sleep(conf["camera_warmup_time"])
 avg = None
 lastUploaded = datetime.datetime.now()
 motionCounter = 0
-
+apiCallCounter=0
 # capture frames from the camera
 while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 	# grab the raw NumPy array representing the image and initialize
@@ -72,6 +72,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 	frame=vs.read() #frame = f.array
 	timestamp = datetime.datetime.now()
 	text = "Unoccupied"
+		
 
 	# resize the frame, convert it to grayscale, and blur it
 	frame = imutils.resize(frame, width=500)
@@ -140,7 +141,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					data = f.read()
 				try:
 					conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
-					#conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, "{body}", headers)
+					apiCallCounter+=1
 					conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
 					response = conn.getresponse()
 					responseData = response.read()
@@ -155,6 +156,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					print("[INFO]:upload time in seconds",azureSeconds)
 					#time.sleep(5)
 					conn.close()
+					print ("numCalls:",apiCallCounter)
 #### END AZURE
 				except Exception as e:
 					#print("[Errno {0}] {1}".format("e.errno", e.strerror))

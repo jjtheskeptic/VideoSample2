@@ -1,5 +1,5 @@
 #How to record video: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
-
+#comment
 # import the necessary packages
 from pyimagesearch.tempimage import TempImage
 #from picamera.array import PiRGBArray
@@ -193,6 +193,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							# captureStartTime = datetime.datetime.now()							
 							# #### Here is where I need to record a few seconds of video
 							# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
+							#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
 							# cap=cv2.VideoCapture(videoDeviceNumber)
 							# if (cap.isOpened() == False): 
   							# 	print("Camera is unable to open.")

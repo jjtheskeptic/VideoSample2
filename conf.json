@@ -1,4 +1,5 @@
 {
+	"videoDeviceNumber":2,
 	"show_video": true,
 	"use_dropbox": false,
 	"dropbox_access_token": "sl.BTB_pd27Nh_GOZZr9Jukp3nD83XE2PMjHFtorUDwFBsHGbknOkXYh6FmjvuH_4e0qJosniSjn4AmpgWzQ80yo5vwqFb9XBE0S2Wu5Re6hIOEqttsfU7XdmofEEIK2iyDRgsvdg4",
@@ -9,7 +10,7 @@
 	"delta_thresh": 5,
 	"resolution": [640, 480],
 	"fps": 16,
-	"min_area": 2000,
+	"min_area": 1000,
 	"azure_api_key":"3d22ee35402e4cb4800cfe918352b2be",
 	"azure_endpoint_url":"https://cattraps.cognitiveservices.azure.com/"
 

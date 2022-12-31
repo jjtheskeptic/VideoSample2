@@ -1,8 +1,11 @@
+#How to record video: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
+
 # import the necessary packages
 from pyimagesearch.tempimage import TempImage
 #from picamera.array import PiRGBArray
 #from picamera import PiCamera.
-from imutils.video import VideoStream #JJ
+import imutils 
+from imutils.video import VideoStream # must install: https://pypi.org/project/imutils/
 import argparse
 import warnings
 import datetime
@@ -11,11 +14,18 @@ import imutils
 import json
 import time
 import cv2
+import os
 # https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
 from msrest.authentication import CognitiveServicesCredentials
 import http.client, urllib.request, urllib.parse, urllib.error, base64
+#
+#Python 3.11.1
+#pip install numpy
+#pip install opencv-python
+#pip install dropbox
+#pip install azure-cognitiveservices-vision-computervision
 
 
 # construct the argument parser and parse the arguments
@@ -48,7 +58,7 @@ if conf["use_dropbox"]:
     # connect to dropbox and start the session authorization process
     client = dropbox.Dropbox(conf["dropbox_access_token"])
     print("[SUCCESS] dropbox account linked")
-
+videoDeviceNumber=conf["videoDeviceNumber"]
 
 	
 # ===============initialize the camera and grab a reference to the raw camera capture
@@ -56,7 +66,9 @@ if conf["use_dropbox"]:
 #camera.resolution = tuple(conf["resolution"])
 #camera.framerate = conf["fps"]
 #rawCapture = PiRGBArray(camera, size=tuple(conf["resolution"]))
-vs=VideoStream(src=2).start() 
+#vs=VideoStream(src=0).start()  #This works for built-in camera on new laptop
+
+vs=VideoStream(src=videoDeviceNumber).start()   # this works for external USB camera on new laptop: 0:internal; 2:external USB
 # allow the camera to warmup, then initialize the average frame, last
 # uploaded timestamp, and frame motion counter
 print("[INFO] warming up...")
@@ -69,7 +81,8 @@ apiCallCounter=0
 while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 	# grab the raw NumPy array representing the image and initialize
 	# the timestamp and occupied/unoccupied text
-	frame=vs.read() #frame = f.array
+	frame_raw=vs.read() #frame = f.array
+	frame=frame_raw
 	timestamp = datetime.datetime.now()
 	text = "Unoccupied"
 		
@@ -126,6 +139,8 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 		if (timestamp - lastUploaded).seconds >= conf["min_upload_seconds"]:
 #			# increment the motion counter
 			motionCounter += 1
+			hasCat=False
+			catTags=["cat","kitty","kitten","felidae","dog"]
 
 			# check to see if the number of frames with consistent motion is
 			# high enough
@@ -134,33 +149,83 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
                 # write the image to temporary file
 				t = TempImage()
 				cv2.imwrite(t.path, frame)
+				#cv2.imwrite("./ImageFiles/",frame) ## JJ testing
 #### AZURE ###
 				# Read file
-				azureStartTime = datetime.datetime.now()
-				with open(t.path, 'rb') as f:
-					data = f.read()
-				try:
-					conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
-					apiCallCounter+=1
-					conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
-					response = conn.getresponse()
-					responseData = response.read()
-					azureEndTime = datetime.datetime.now()
-					azureSeconds=(azureEndTime-azureStartTime).seconds;
-					#print(responseData)
-					pythonObj=json.loads(responseData)
-					print(pythonObj["tagsResult"])
-					tags=pythonObj["tagsResult"]
-					for object in tags["values"]:
-						print(object["name"], object["confidence"])
-					print("[INFO]:upload time in seconds",azureSeconds)
-					#time.sleep(5)
-					conn.close()
-					print ("numCalls:",apiCallCounter)
-#### END AZURE
-				except Exception as e:
-					#print("[Errno {0}] {1}".format("e.errno", e.strerror))
-					print("[Errno {0}] {1}".format("error", e))
+				if 1==1:  #testing to exclude azure
+					azureStartTime = datetime.datetime.now()
+					lastUploaded=azureStartTime
+					with open(t.path, 'rb') as f:
+						data = f.read()
+					try:
+						hasCat=False
+						conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
+						apiCallCounter+=1
+						conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
+						response = conn.getresponse()
+						responseData = response.read()
+						azureEndTime = datetime.datetime.now()
+						azureSeconds=(azureEndTime-azureStartTime).seconds
+						print("[INFO]:upload time in seconds",azureSeconds)
+						conn.close()		
+						#print(responseData)
+						pythonObj=json.loads(responseData)
+						print(pythonObj["tagsResult"])
+						tags=pythonObj["tagsResult"]
+						for object in tags["values"]:
+							if hasCat==True:
+								break
+							#print(object["name"], object["confidence"])
+							if object["name"] in catTags:
+								if object["confidence"] > .6:
+									print(object["name"], object["confidence"])
+									hasCat=True
+									
+										
+						
+						print ("numCalls:",apiCallCounter)
+						#if hasCat == False:  #Delete the temp image if no cat detected
+						if 1==2:
+							os.remove(t.path)
+							print ("Deleting temp file")
+						else:
+							print("capture video here")
+							# captureStartTime = datetime.datetime.now()							
+							# #### Here is where I need to record a few seconds of video
+							# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
+							# cap=cv2.VideoCapture(videoDeviceNumber)
+							# if (cap.isOpened() == False): 
+  							# 	print("Camera is unable to open.")
+
+							# #frame_width = int(frame_raw.get(3))
+							# #frame_height = int(frame_raw.get(4))
+							
+							# frame_width = int(cap.get(3))
+							# frame_height = int(cap.get(4))
+							
+							
+							# video_output=cv2.VideoWriter('captured_video.avi',cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, (frame_width,frame_height))
+							# while ((1==1) and ((datetime.datetime.now()-captureStartTime).seconds < 1) ):
+							# 	ret,frame=cap.read()
+							# 	#ret,frame_raw=vs.read()
+							# 	if ret==True:
+							# 		video_output.write(frame)
+							# 		cv2.imshow('frame',frame)
+							# 		print("capturing video..")
+							# 	else:
+							# 		break
+							# cap.release()
+							# video_output.release()
+							# print("Video capture stopped")
+							# # cv2.destroyAllWindows() #probably don't want to do this
+							# # cv2.destroyWindow(video_output)
+							
+
+	#### END AZURE
+						
+					except Exception as e:
+						#print("[Errno {0}] {1}".format("e.errno", e.strerror))
+						print("[Errno {0}] {1}".format("error", e))
 
 
 

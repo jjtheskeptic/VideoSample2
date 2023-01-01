@@ -14,6 +14,7 @@ import imutils
 import json
 import time
 import cv2
+
 import os
 # https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
@@ -26,6 +27,7 @@ import http.client, urllib.request, urllib.parse, urllib.error, base64
 #pip install opencv-python
 #pip install dropbox
 #pip install azure-cognitiveservices-vision-computervision
+
 
 
 # construct the argument parser and parse the arguments

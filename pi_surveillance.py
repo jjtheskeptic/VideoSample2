@@ -9,7 +9,7 @@ from imutils.video import VideoStream # must install: https://pypi.org/project/i
 import argparse
 import warnings
 import datetime
-import dropbox
+#import dropbox
 import imutils
 import json
 import time
@@ -23,11 +23,6 @@ from msrest.authentication import CognitiveServicesCredentials
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 #
 #Python 3.11.1
-#pip install numpy
-#pip install opencv-python
-#pip install dropbox
-#pip install azure-cognitiveservices-vision-computervision
-
 
 
 # construct the argument parser and parse the arguments
@@ -71,6 +66,7 @@ videoDeviceNumber=conf["videoDeviceNumber"]
 #vs=VideoStream(src=0).start()  #This works for built-in camera on new laptop
 
 vs=VideoStream(src=videoDeviceNumber).start()   # this works for external USB camera on new laptop: 0:internal; 2:external USB
+#on the pi, deviceNumber0 works for the external USB camera
 # allow the camera to warmup, then initialize the average frame, last
 # uploaded timestamp, and frame motion counter
 print("[INFO] warming up...")
@@ -147,7 +143,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 			# check to see if the number of frames with consistent motion is
 			# high enough
 			if motionCounter >= conf["min_motion_frames"]:
-				#print("[INFO] - MOTION FOUND") # DO SOMETHING
+				print("[INFO] - MOTION DETECTED") 
                 # write the image to temporary file
 				t = TempImage()
 				cv2.imwrite(t.path, frame)
@@ -161,16 +157,17 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						data = f.read()
 					try:
 						hasCat=False
+						print("[INFO] making POST request")
 						conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
 						apiCallCounter+=1
 						conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
+						print("[INFO] POST complete")
 						response = conn.getresponse()
 						responseData = response.read()
 						azureEndTime = datetime.datetime.now()
 						azureSeconds=(azureEndTime-azureStartTime).seconds
 						print("[INFO]:upload time in seconds",azureSeconds)
 						conn.close()		
-						#print(responseData)
 						pythonObj=json.loads(responseData)
 						print(pythonObj["tagsResult"])
 						tags=pythonObj["tagsResult"]
@@ -186,10 +183,9 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 										
 						
 						print ("numCalls:",apiCallCounter)
-						#if hasCat == False:  #Delete the temp image if no cat detected
-						if 1==2:
-							os.remove(t.path)
-							print ("Deleting temp file")
+						if hasCat == False:  #Delete the temp image if no cat detected
+							#if 1==2:
+							t.cleanup()
 						else:
 							print("capture video here")
 							# captureStartTime = datetime.datetime.now()							

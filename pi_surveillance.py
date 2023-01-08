@@ -188,34 +188,39 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							t.cleanup()
 						else:
 							print("capture video here")
-							# captureStartTime = datetime.datetime.now()							
+							captureStartTime = datetime.datetime.now()							
 							# #### Here is where I need to record a few seconds of video
 							# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
 							#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
-							# cap=cv2.VideoCapture(videoDeviceNumber)
-							# if (cap.isOpened() == False): 
+							#cap=cv2.VideoCapture(videoDeviceNumber)
+							#if (cap.isOpened() == False): 
   							# 	print("Camera is unable to open.")
-
-							# #frame_width = int(frame_raw.get(3))
-							# #frame_height = int(frame_raw.get(4))
+							#print("75")
+							#frame_width = int(frame_raw.get(3))
+							#print("80")
+							#frame_height = int(frame_raw.get(4))
 							
 							# frame_width = int(cap.get(3))
 							# frame_height = int(cap.get(4))
 							
-							
-							# video_output=cv2.VideoWriter('captured_video.avi',cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, (frame_width,frame_height))
-							# while ((1==1) and ((datetime.datetime.now()-captureStartTime).seconds < 1) ):
-							# 	ret,frame=cap.read()
-							# 	#ret,frame_raw=vs.read()
-							# 	if ret==True:
-							# 		video_output.write(frame)
-							# 		cv2.imshow('frame',frame)
-							# 		print("capturing video..")
-							# 	else:
-							# 		break
-							# cap.release()
+							print("100")
+							#video_output=cv2.VideoWriter('captured_video.avi',cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, (frame_width,frame_height))
+							video_output=cv2.VideoWriter('captured_video.avi',cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
+							print ("200")
+							while ((1==1) and ((datetime.datetime.now()-captureStartTime).seconds < 2) ):
+								print ("300")
+								#ret,frame=cap.read()
+								#ret,frame_raw=vs.read()
+								#if ret==True:
+								print("400")
+								video_output.write(frame_raw)
+								cv2.imshow('frame',frame_raw)
+								#print("capturing video..")
+								#else:
+								#	break
+								#cap.release()
 							# video_output.release()
-							# print("Video capture stopped")
+							print("Video capture stopped")
 							# # cv2.destroyAllWindows() #probably don't want to do this
 							# # cv2.destroyWindow(video_output)
 							

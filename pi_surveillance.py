@@ -208,7 +208,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							video_output=cv2.VideoWriter('captured_video.avi',cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
 							print ("200")
 							while ((1==1) and ((datetime.datetime.now()-captureStartTime).seconds < 2) ):
-								print ("300")
+								print ("300.")
 								#ret,frame=cap.read()
 								#ret,frame_raw=vs.read()
 								#if ret==True:

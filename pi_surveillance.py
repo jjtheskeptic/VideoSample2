@@ -138,7 +138,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 #			# increment the motion counter
 			motionCounter += 1
 			hasCat=False
-			catTags=["cat","kitty","kitten","felidae","dog"]
+			catTags=["cat","kitty","kitten","felidae","dog","hand"]
 
 			# check to see if the number of frames with consistent motion is
 			# high enough

@@ -117,7 +117,6 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 	cv2.putText(frame, ts, (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX,
 		0.35, (0, 0, 255), 1)
-##### UPLOAD TO DROPBOX #######
         # check to see if the room is occupied
 	if text == "Occupied":
 #		# check to see if enough time has passed between uploads
@@ -134,7 +133,6 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
                 # write the image to temporary file
 				t = TempImage()
 				cv2.imwrite(t.path, frame)
-				#cv2.imwrite("./ImageFiles/",frame) ## JJ testing
 #### AZURE ###
 				# Read file
 				if 1==1:  #testing to exclude azure
@@ -158,20 +156,19 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						pythonObj=json.loads(responseData)
 						#print(pythonObj["tagsResult"])
 						tags=pythonObj["tagsResult"]
+						detectionText=""
 						for object in tags["values"]:
 							if hasCat==True:
 								break
 							if object["name"] in catTags:
 								if object["confidence"] > .6:
 									print(object["name"], object["confidence"])
+									detectionText+=object["name"]+":"+object["confidence"]+"\r\n"
 									hasCat=True
-									
-										
-						
 						print ("numCalls:",apiCallCounter)
-						#t.cleanup() #delete the temp image
+
+
 						if hasCat == False:  #Delete the temp image if no cat detected
-							#if 1==2:
 							t.cleanup()
 						else:
 							print("capture video here",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
@@ -181,33 +178,17 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							# #### Here is where I need to record a few seconds of video
 							# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
 							#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
-							#cap=cv2.VideoCapture(videoDeviceNumber)
-							#if (cap.isOpened() == False): 
-  							# 	print("Camera is unable to open.")
-							#print("75")
-							#frame_width = int(frame_raw.get(3))
-							#print("80")
-							#frame_height = int(frame_raw.get(4))
-							
-							# frame_width = int(cap.get(3))
-							# frame_height = int(cap.get(4))
 							
 							print("100",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-							#video_output=cv2.VideoWriter('captured_video.avi',cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, (frame_width,frame_height))
-							#video_output=cv2.VideoWriter('./ImageFiles/captured_video.avi',cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
 							video_output=cv2.VideoWriter(videoFileName,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
 							print ("200"+datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 							while ((1==1) and ((datetime.datetime.now()-captureStartTime).seconds < 3) ):
 								frame_raw=vs.read() 
+								cv2.putText(frame_raw, "Objects: {}".format(detectionText), (10, 20),
+									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 								video_output.write(frame_raw)
 								#cv2.imshow('frame',frame_raw)  # this is too slow to come up on the RasberryPi/VNC								
-								#else:
-								#	break
-								#cap.release()
-							# video_output.release()
 							print("Video capture stopped",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-
-							
 
 	#### END AZURE
 						
@@ -215,32 +196,6 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						#print("[Errno {0}] {1}".format("e.errno", e.strerror))
 						print("[Errno {0}] {1}".format("error", e))
 
-
-
-				# update the last uploaded timestamp and reset the motion
-				# counter
-				#lastUploaded = timestamp
-				#motionCounter = 0
-#				t.cleanup()
-				# check to see if dropbox sohuld be used
-#				if conf["use_dropbox"]:
-					# write the image to temporary file
-#					t = TempImage()
-#					cv2.imwrite(t.path, frame)
-
-					# upload the image to Dropbox and cleanup the tempory image
-#					print("[UPLOAD] {}".format(ts))
-#					path = "/{base_path}/{timestamp}.jpg".format(
-#					    base_path=conf["dropbox_base_path"], timestamp=ts)
-#					client.files_upload(open(t.path, "rb").read(), path)
-#					t.cleanup()
-
-				# update the last uploaded timestamp and reset the motion
-				# counter
-#				lastUploaded = timestamp
-#				motionCounter = 0
-
-	# otherwise, the room is not occupied
 	else:
 		motionCounter = 0
 ####################################################################

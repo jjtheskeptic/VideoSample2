@@ -1,15 +1,11 @@
 #How to record video: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
-#comment
 # import the necessary packages
 from pyimagesearch.tempimage import TempImage
-#from picamera.array import PiRGBArray
-#from picamera import PiCamera.
 import imutils 
 from imutils.video import VideoStream # must install: https://pypi.org/project/imutils/
 import argparse
 import warnings
 import datetime
-#import dropbox
 import imutils
 import json
 import time
@@ -21,12 +17,10 @@ from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
 from msrest.authentication import CognitiveServicesCredentials
 import http.client, urllib.request, urllib.parse, urllib.error, base64
-#
 #Python 3.11.1
 
 
-# filter warnings, load the configuration and initialize the Dropbox
-# client
+# filter warnings, load the configuration
 warnings.filterwarnings("ignore")
 conf=json.load(open("conf.json"))#conf = json.load(open(args["conf"]))
 client = None
@@ -44,11 +38,7 @@ params = urllib.parse.urlencode({
    # 'smartcrops-aspect-ratios': '{string}',
 })
 
-# check to see if the Dropbox should be used
-if conf["use_dropbox"]:
-    # connect to dropbox and start the session authorization process
-    client = dropbox.Dropbox(conf["dropbox_access_token"])
-    print("[SUCCESS] dropbox account linked")
+
 videoDeviceNumber=conf["videoDeviceNumber"]
 filenameDateFormatString="%Y_%m_%d_%H_%M_%S"
 
@@ -185,9 +175,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 								textOutputPixelY+=15
 							video_output.write(frame_raw)							
 						print("[INFO] Video capture stopped: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-
-#### END AZURE
-					
+#### END AZURE					
 				except Exception as e:
 					print("[Errno {0}] {1}".format("error", e))
 

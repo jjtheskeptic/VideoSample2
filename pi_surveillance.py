@@ -124,7 +124,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 #			# increment the motion counter
 			motionCounter += 1
 			hasCat=False
-			catTags=["cat","kitty","kitten","felidae","dog","hand"]
+			catTags=["cat","kitty","kitten","felidae","dog"]
 
 			# check to see if the number of frames with consistent motion is
 			# high enough
@@ -134,67 +134,62 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 				t = TempImage()
 				cv2.imwrite(t.path, frame)
 #### AZURE ###
-				# Read file
-				if 1==1:  #testing to exclude azure
-					azureStartTime = datetime.datetime.now()
-					lastUploaded=azureStartTime
-					with open(t.path, 'rb') as f:
-						data = f.read()
-					try:
-						hasCat=False
-						print("[INFO] making POST request-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-						conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
-						apiCallCounter+=1
-						conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
-						print("[INFO] POST complete-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-						response = conn.getresponse()
-						responseData = response.read()
-						azureEndTime = datetime.datetime.now()
-						azureSeconds=(azureEndTime-azureStartTime).seconds
-						print("[INFO]:upload time in seconds",azureSeconds,datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-						conn.close()		
-						pythonObj=json.loads(responseData)
-						#print(pythonObj["tagsResult"])
-						tags=pythonObj["tagsResult"]
-						detectionText=""
-						for object in tags["values"]:
-							if hasCat==True:
-								break
-							if object["name"] in catTags:
-								if object["confidence"] > .6:
-									print(object["name"], object["confidence"])
-									detectionText+=object["name"]+":"+object["confidence"]+"\r\n"
-									hasCat=True
-						print ("numCalls:",apiCallCounter)
+				azureStartTime = datetime.datetime.now()
+				lastUploaded=azureStartTime
+				with open(t.path, 'rb') as f:
+					data = f.read()
+				try:
+					hasCat=False
+					print("[INFO] making POST request-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
+					conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
+					apiCallCounter+=1
+					conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
+					print("[INFO] POST complete-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
+					response = conn.getresponse()
+					responseData = response.read()
+					azureEndTime = datetime.datetime.now()
+					azureSeconds=(azureEndTime-azureStartTime).seconds
+					print("[INFO]:upload time in seconds",azureSeconds,datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
+					conn.close()		
+					pythonObj=json.loads(responseData)
+					#print(pythonObj["tagsResult"])
+					tags=pythonObj["tagsResult"]
+					detectionText=""
+					for object in tags["values"]:							
+						if ((object["name"] in catTags) and (object["confidence"] > .6)):								
+							print(object["name"], object["confidence"])									
+							hasCat=True
+							detectionText+=object["name"]+":"+str(round(object["confidence"],2))+"; "
+					print ("numCalls:",apiCallCounter)
 
 
-						if hasCat == False:  #Delete the temp image if no cat detected
-							t.cleanup()
-						else:
-							print("capture video here",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-							captureStartTime = datetime.datetime.now()		
-							startTimeString = captureStartTime.strftime("%A %d %B %Y %I_%M_%S%p")	
-							videoFileName="./ImageFiles/Capture_"+datetime.datetime.now().strftime(filenameDateFormatString)+".avi"			
-							# #### Here is where I need to record a few seconds of video
-							# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
-							#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
-							
-							print("100",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-							video_output=cv2.VideoWriter(videoFileName,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
-							print ("200"+datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-							while ((1==1) and ((datetime.datetime.now()-captureStartTime).seconds < 3) ):
-								frame_raw=vs.read() 
-								cv2.putText(frame_raw, "Objects: {}".format(detectionText), (10, 20),
-									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-								video_output.write(frame_raw)
-								#cv2.imshow('frame',frame_raw)  # this is too slow to come up on the RasberryPi/VNC								
-							print("Video capture stopped",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
-
-	#### END AZURE
+					if hasCat == False:  #Delete the temp image if no cat detected
+						t.cleanup()
+					else:
+						print("[INFO] Start Video Capture: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
+						captureStartTime = datetime.datetime.now()		
+						startTimeString = captureStartTime.strftime("%A %d %B %Y %I_%M_%S%p")	
+						videoFileName="./ImageFiles/"+datetime.datetime.now().strftime(filenameDateFormatString)+".avi"			
+						# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
+						#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
 						
-					except Exception as e:
-						#print("[Errno {0}] {1}".format("e.errno", e.strerror))
-						print("[Errno {0}] {1}".format("error", e))
+						video_output=cv2.VideoWriter(videoFileName,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
+						
+						while  ((datetime.datetime.now()-captureStartTime).seconds < 5) :
+							textOutputPixelY=10
+							frame_raw=vs.read() 
+							for object in tags["values"]:	#print the objects detected to the frame											
+								detectionText=object["name"]+":"+str(round(object["confidence"],2))+"; "
+								cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
+									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+								textOutputPixelY+=15
+							video_output.write(frame_raw)							
+						print("[INFO] Video capture stopped: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
+
+#### END AZURE
+					
+				except Exception as e:
+					print("[Errno {0}] {1}".format("error", e))
 
 	else:
 		motionCounter = 0

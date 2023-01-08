@@ -51,7 +51,6 @@ time.sleep(conf["camera_warmup_time"])
 avg = None
 lastUploaded = datetime.datetime.now()
 motionCounter = 0
-apiCallCounter=0
 # capture frames from the camera
 while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 	# grab the raw NumPy array representing the image and initialize
@@ -99,7 +98,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 		# and update the text
 		(x, y, w, h) = cv2.boundingRect(c)
 		cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-		text = "Occupied"
+		text = "Motion Detected"
 
 	# draw the text and timestamp on the frame
 	ts = timestamp.strftime("%A %d %B %Y %I:%M:%S%p")
@@ -108,16 +107,15 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 	cv2.putText(frame, ts, (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX,
 		0.35, (0, 0, 255), 1)
         # check to see if the room is occupied
-	if text == "Occupied":
-#		# check to see if enough time has passed between uploads
-		if (timestamp - lastUploaded).seconds >= conf["min_upload_seconds"]:
-#			# increment the motion counter
+	if text == "Motion Detected":
+		# check to see if enough time has passed between uploads
+		if (timestamp - lastUploaded).seconds >= conf["wait_between_detections_seconds"]:
+			# increment the motion counter
 			motionCounter += 1
 			hasCat=False
-			catTags=["cat","kitty","kitten","felidae","dog"]
+			detectionTags=conf["trigger_objects"]
 
-			# check to see if the number of frames with consistent motion is
-			# high enough
+			# check to see if the number of frames with consistent motion is high enough
 			if motionCounter >= conf["min_motion_frames"]:
 				print("[INFO] - MOTION DETECTED-"+datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p")) 
                 # write the image to temporary file
@@ -130,11 +128,10 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					data = f.read()
 				try:
 					hasCat=False
-					print("[INFO] making POST request-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
+					print("[INFO] making AZURE request-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 					conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
-					apiCallCounter+=1
 					conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
-					print("[INFO] POST complete-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
+					print("[INFO] AZURE POST complete-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 					response = conn.getresponse()
 					responseData = response.read()
 					azureEndTime = datetime.datetime.now()
@@ -144,16 +141,15 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					pythonObj=json.loads(responseData)
 					#print(pythonObj["tagsResult"])
 					tags=pythonObj["tagsResult"]
+					
 					detectionText=""
-					for object in tags["values"]:							
-						if ((object["name"] in catTags) and (object["confidence"] > .6)):								
+					for object in tags["values"]:		
+						print(object["name"], object["confidence"])						
+						if ((object["name"] in detectionTags) and (object["confidence"] > .6)):								
 							print(object["name"], object["confidence"])									
 							hasCat=True
 							detectionText+=object["name"]+":"+str(round(object["confidence"],2))+"; "
-					print ("numCalls:",apiCallCounter)
-
-
-					if hasCat == False:  #Delete the temp image if no cat detected
+					if hasCat == False:  #Delete the temp image if desired object not detected
 						t.cleanup()
 					else:
 						print("[INFO] Start Video Capture: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
@@ -165,7 +161,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						
 						video_output=cv2.VideoWriter(videoFileName,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
 						
-						while  ((datetime.datetime.now()-captureStartTime).seconds < 5) :
+						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
 							textOutputPixelY=10
 							frame_raw=vs.read() 
 							for object in tags["values"]:	#print the objects detected to the frame											
@@ -191,6 +187,3 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 		# if the `q` key is pressed, break from the lop
 		if key == ord("q"):
 			break
-
-	# clear the stream in preparation for the next frame
-	#rawCapture.truncate(0)

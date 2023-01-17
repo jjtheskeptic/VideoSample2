@@ -1,6 +1,7 @@
 #How to record video: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
 # import the necessary packages
 from pyimagesearch.tempimage import TempImage
+from Servo import Servox
 import imutils 
 from imutils.video import VideoStream # must install: https://pypi.org/project/imutils/
 import argparse
@@ -19,6 +20,7 @@ from msrest.authentication import CognitiveServicesCredentials
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 #Python 3.11.1
 
+theServo=Servo(11)
 
 # filter warnings, load the configuration
 warnings.filterwarnings("ignore")
@@ -152,6 +154,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					if hasCat == False:  #Delete the temp image if desired object not detected
 						t.cleanup()
 					else:
+						theServo.trigger()
 						print("[INFO] Start Video Capture: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 						captureStartTime = datetime.datetime.now()		
 						startTimeString = captureStartTime.strftime("%A %d %B %Y %I_%M_%S%p")	

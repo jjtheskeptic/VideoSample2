@@ -24,7 +24,7 @@ theServo=Servox(11)
 
 # filter warnings, load the configuration
 warnings.filterwarnings("ignore")
-conf=json.load(open("conf.json"))#conf = json.load(open(args["conf"]))
+conf=json.load(open("./conf.json"))#conf = json.load(open(args["conf"]))
 client = None
 # https://westus.dev.cognitive.microsoft.com/docs/services//unified-vision-apis-public-preview-2022-10-12-preview/operations/61d65934cd35050c20f73ab6
 headers = {

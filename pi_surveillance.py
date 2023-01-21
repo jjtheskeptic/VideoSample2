@@ -1,5 +1,7 @@
 #How to record video: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
 # import the necessary packages
+#current execute command: python3 /home/pi/Documents/Python/GitHub/VideoSample2/pi_surveillance.py
+
 from pyimagesearch.tempimage import TempImage
 from Servo import Servox
 import imutils 
@@ -158,11 +160,15 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						print("[INFO] Start Video Capture: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 						captureStartTime = datetime.datetime.now()		
 						startTimeString = captureStartTime.strftime("%A %d %B %Y %I_%M_%S%p")	
-						videoFileName="./ImageFiles/"+datetime.datetime.now().strftime(filenameDateFormatString)+".avi"			
+						
+						videoFileName="/ImageFiles/"+datetime.datetime.now().strftime(filenameDateFormatString)+".avi"	
+						videoFilePath="{0}{1}".format(dir_path,videoFileName)		
+						print("debug: dir_path",dir_path)
+						print("DEBUG: videoFilePath:",videoFilePath)
 						# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
 						#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
 						
-						video_output=cv2.VideoWriter(videoFileName,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
+						video_output=cv2.VideoWriter(videoFilePath,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
 						
 						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
 							textOutputPixelY=10

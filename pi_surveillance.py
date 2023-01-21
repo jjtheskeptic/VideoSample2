@@ -20,7 +20,7 @@ from msrest.authentication import CognitiveServicesCredentials
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 #Python 3.11.1
 
-theServo=Servo(11)
+theServo=Servox(11)
 
 # filter warnings, load the configuration
 warnings.filterwarnings("ignore")
@@ -143,11 +143,10 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					pythonObj=json.loads(responseData)
 					#print(pythonObj["tagsResult"])
 					tags=pythonObj["tagsResult"]
-					
 					detectionText=""
 					for object in tags["values"]:		
 						print(object["name"], object["confidence"])						
-						if ((object["name"] in detectionTags) and (object["confidence"] > .6)):								
+						if ((object["name"] in detectionTags) and (object["confidence"] > conf["confidence_threshold"])):								
 							print(object["name"], object["confidence"])									
 							hasCat=True
 							detectionText+=object["name"]+":"+str(round(object["confidence"],2))+"; "
@@ -187,6 +186,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 		cv2.imshow("Cat-Cam", frame)
 		key = cv2.waitKey(1) & 0xFF
 
-		# if the `q` key is pressed, break from the lop
+		# if the `q` key is pressed, break from the loop
 		if key == ord("q"):
+			theServo.cleanup()
 			break

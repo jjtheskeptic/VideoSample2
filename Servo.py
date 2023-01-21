@@ -1,5 +1,5 @@
 # info from: https://www.section.io/engineering-education/how-to-control-a-servo-motor-using-a-raspberry-pi-3
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 from time import sleep
 #DutyCycle values:     
@@ -13,15 +13,16 @@ from time import sleep
 class Servox:
     def __init__(self,servoPin):
         #servoPin=11
-        positionStart=11.5
-        positionEnd=2
+        self.positionStart=11.5
+        self.positionEnd=2
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(servoPin,GPIO.OUT)
-        thisServo = GPIO.PWM(self.servoPin,50)
-        thisServo.start(0)
-        thisServo.changeDutyCycle(positionStart)
+        #thisServo = GPIO.PWM(self.servoPin,50)
+        self.thisServo = GPIO.PWM(servoPin,50)
+        self.thisServo.start(0)
+        self.thisServo.ChangeDutyCycle(self.positionStart)
         time.sleep(0.5)
-        thisServo.changeDutyCycle(0)
+        self.thisServo.ChangeDutyCycle(0)
 
             
     def cleanup(self):
@@ -30,8 +31,9 @@ class Servox:
         GPIO.cleanup()
 
     def trigger(self):
-        self.thisServo.changeDutyCycle(self.positionEnd)
+        print("[INFO] Servo Triggered")
+        self.thisServo.ChangeDutyCycle(self.positionEnd)
         time.sleep(0.5)
-        self.thisServo.changeDutyCycle(self.positionStart)
+        self.thisServo.ChangeDutyCycle(self.positionStart)
         time.sleep(0.5)
-        self.thisServo.changeDutyCycle(0)
+        self.thisServo.ChangeDutyCycle(0)

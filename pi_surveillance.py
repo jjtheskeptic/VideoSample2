@@ -11,7 +11,6 @@ import imutils
 import json
 import time
 import cv2
-
 import os
 # https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
@@ -24,7 +23,9 @@ theServo=Servox(11)
 
 # filter warnings, load the configuration
 warnings.filterwarnings("ignore")
-conf=json.load(open("./conf.json"))#conf = json.load(open(args["conf"]))
+dir_path=os.path.dirname(os.path.realpath(__file__))
+conf_path=os.path.join(dir_path,'conf.json')
+conf=json.load(open(conf_path))  #conf = json.load(open(args["conf"]))
 client = None
 # https://westus.dev.cognitive.microsoft.com/docs/services//unified-vision-apis-public-preview-2022-10-12-preview/operations/61d65934cd35050c20f73ab6
 headers = {

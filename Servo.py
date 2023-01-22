@@ -13,7 +13,7 @@ from time import sleep
 class Servox:
     def __init__(self,servoPin):
         #servoPin=11
-        self.positionStart=8#11.5
+        self.positionStart=8 #8 is slightly less than halfway
         self.positionEnd=2
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(servoPin,GPIO.OUT)

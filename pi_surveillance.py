@@ -166,11 +166,14 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
 						#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
 						
-						video_output=cv2.VideoWriter(videoFilePath,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
+						video_output=cv2.VideoWriter(videoFilePath,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),30, tuple(conf["resolution"]))
 						servoTriggered=False
+						
 						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
-							textOutputPixelY=10
+							textOutputPixelY=20
 							frame_raw=vs.read() 
+							cv2.putText(frame_raw, "{}".format(startTimeString), (10,10),
+									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 							for object in tags["values"]:	#print the objects detected to the frame											
 								detectionText=object["name"]+":"+str(round(object["confidence"],2))+"; "
 								cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
@@ -178,7 +181,8 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 								textOutputPixelY+=15
 							video_output.write(frame_raw)
 							#try to start the servo on a separate thread so it doesn't interrupt recording the video
-							if (servoTriggered==False):
+							#also record 1 second before starting the servo to better capture the reaction
+							if (servoTriggered==False) and ((datetime.datetime.now()-captureStartTime).seconds) > 1:
 								servoTriggered=True
 								servoThread=threading.Thread(target=theServo.trigger())
 								servoThread.start()

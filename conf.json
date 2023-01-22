@@ -8,7 +8,7 @@
 	"resolution": [640, 480],
 	"min_area": 500,
 	"video_recording_seconds":5,
-	"trigger_objects":["cat","kitty","kitten","felidae"],
+	"trigger_objects":["cat","kitty","kitten","felidae","person"],
 	"confidence_threshold":0.50,
 	"azure_api_key":"3d22ee35402e4cb4800cfe918352b2be",
 	"azure_endpoint_url":"https://cattraps.cognitiveservices.azure.com/"

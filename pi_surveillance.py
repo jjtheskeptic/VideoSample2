@@ -14,6 +14,8 @@ import json
 import time
 import cv2
 import os
+import threading
+
 # https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from azure.cognitiveservices.vision.computervision.models import VisualFeatureTypes
@@ -136,7 +138,6 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					print("[INFO] making AZURE request-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 					conn = http.client.HTTPSConnection('cattraps.cognitiveservices.azure.com')
 					conn.request("POST", "/computervision/imageanalysis:analyze?api-version=2022-10-12-preview&%s" % params, data, headers)
-					print("[INFO] AZURE POST complete-",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 					response = conn.getresponse()
 					responseData = response.read()
 					azureEndTime = datetime.datetime.now()
@@ -144,7 +145,6 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					print("[INFO]:upload time in seconds",azureSeconds,datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 					conn.close()		
 					pythonObj=json.loads(responseData)
-					#print(pythonObj["tagsResult"])
 					tags=pythonObj["tagsResult"]
 					detectionText=""
 					for object in tags["values"]:		
@@ -156,20 +156,18 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					if hasCat == False:  #Delete the temp image if desired object not detected
 						t.cleanup()
 					else:
-						theServo.trigger()
+						
 						print("[INFO] Start Video Capture: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 						captureStartTime = datetime.datetime.now()		
 						startTimeString = captureStartTime.strftime("%A %d %B %Y %I_%M_%S%p")	
 						
 						videoFileName="/ImageFiles/"+datetime.datetime.now().strftime(filenameDateFormatString)+".avi"	
 						videoFilePath="{0}{1}".format(dir_path,videoFileName)		
-						print("debug: dir_path",dir_path)
-						print("DEBUG: videoFilePath:",videoFilePath)
 						# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
 						#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
 						
 						video_output=cv2.VideoWriter(videoFilePath,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),20, tuple(conf["resolution"]))
-						
+						servoTriggered=False
 						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
 							textOutputPixelY=10
 							frame_raw=vs.read() 
@@ -178,11 +176,17 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 								cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
 									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 								textOutputPixelY+=15
-							video_output.write(frame_raw)							
+							video_output.write(frame_raw)
+							#try to start the servo on a separate thread so it doesn't interrupt recording the video
+							if (servoTriggered==False):
+								servoTriggered=True
+								servoThread=threading.Thread(target=theServo.trigger())
+								servoThread.start()
+
 						print("[INFO] Video capture stopped: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 #### END AZURE					
 				except Exception as e:
-					print("[Errno {0}] {1}".format("error", e))
+					print("[ErrNo {0}] {1}".format("error", e))
 
 	else:
 		motionCounter = 0

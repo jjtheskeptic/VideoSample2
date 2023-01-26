@@ -168,7 +168,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						
 						video_output=cv2.VideoWriter(videoFilePath,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),30, tuple(conf["resolution"]))
 						servoTriggered=False
-						
+						servoThread=threading.Thread(target=theServo.trigger()) #get the thread ready to start, hopefully
 						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
 							textOutputPixelY=20
 							frame_raw=vs.read() 
@@ -184,7 +184,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							#also record 1 second before starting the servo to better capture the reaction
 							if (servoTriggered==False) and ((datetime.datetime.now()-captureStartTime).seconds) > 1:
 								servoTriggered=True
-								servoThread=threading.Thread(target=theServo.trigger())
+								#servoThread=threading.Thread(target=theServo.trigger())
 								servoThread.start()
 
 						print("[INFO] Video capture stopped: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))

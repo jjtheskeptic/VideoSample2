@@ -15,6 +15,7 @@ import time
 import cv2
 import os
 import threading
+from multiprocessing import Process #https://blog.devgenius.io/why-is-multi-threaded-python-so-slow-f032757f72dc
 
 # https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
@@ -24,6 +25,7 @@ import http.client, urllib.request, urllib.parse, urllib.error, base64
 #Python 3.11.1
 
 theServo=Servox(11)
+
 
 # filter warnings, load the configuration
 warnings.filterwarnings("ignore")
@@ -147,6 +149,9 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					pythonObj=json.loads(responseData)
 					tags=pythonObj["tagsResult"]
 					detectionText=""
+				#### TESTING
+					#hasCat=True
+				#### TESTING
 					for object in tags["values"]:		
 						print(object["name"], object["confidence"])						
 						if ((object["name"] in detectionTags) and (object["confidence"] > conf["confidence_threshold"])):								
@@ -184,7 +189,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							#also record 1 second before starting the servo to better capture the reaction
 							if (servoTriggered==False) and ((datetime.datetime.now()-captureStartTime).seconds) > 1:
 								servoTriggered=True
-								#servoThread=threading.Thread(target=theServo.trigger())
+								#servoThread=threading.Thread(target=theServo.trigger)
 								servoThread.start()
 
 						print("[INFO] Video capture stopped: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))

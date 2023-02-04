@@ -34,6 +34,12 @@ class Servox:
         print("[INFO] Servo Triggered")
         self.thisServo.ChangeDutyCycle(self.positionEnd)
         time.sleep(0.5)
+        #self.thisServo.ChangeDutyCycle(self.positionStart)
+        #time.sleep(0.5)
+        #self.thisServo.ChangeDutyCycle(0)
+
+    def reset(self):
+        print("[INFO] Servo Reset called")
         self.thisServo.ChangeDutyCycle(self.positionStart)
         time.sleep(0.5)
         self.thisServo.ChangeDutyCycle(0)

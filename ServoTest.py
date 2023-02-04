@@ -17,15 +17,15 @@ def servoTest():
     #  1.5  = MIN - slightly less than 0
     # 12.3 = MAX (slightly more than 180 degrees)
 
-
+  
     print ("Rotating")
     duty = 2
     while duty <= 12:
         print("  ",duty)
         servo.ChangeDutyCycle(duty)
-        time.sleep(0.1)
-        servo.ChangeDutyCycle(0)
-        time.sleep(.5)
+        time.sleep(0.5)
+        #servo.ChangeDutyCycle(0)
+        #time.sleep(.5)
         duty = duty + 1
         
 

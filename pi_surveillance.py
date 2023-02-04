@@ -3,7 +3,7 @@
 #current execute command: python3 /home/pi/Documents/Python/GitHub/VideoSample2/pi_surveillance.py
 
 from pyimagesearch.tempimage import TempImage
-from Servo import Servox
+#from Servo import Servox
 import imutils 
 from imutils.video import VideoStream # must install: https://pypi.org/project/imutils/
 import argparse
@@ -15,6 +15,7 @@ import time
 import cv2
 import os
 import threading
+import RPi.GPIO as GPIO
 from multiprocessing import Process #https://blog.devgenius.io/why-is-multi-threaded-python-so-slow-f032757f72dc
 
 # https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
@@ -24,8 +25,49 @@ from msrest.authentication import CognitiveServicesCredentials
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 #Python 3.11.1
 
-theServo=Servox(11)
+servoPositionStart=8
+servoPositionEnd=2
+servoPin=11
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(servoPin,GPIO.OUT)
+thisServo = GPIO.PWM(servoPin,50)
+thisServo.start(0)
+def servoInitialize():
+	print("[INFO]initialising Servo")
+	#thisServo = GPIO.PWM(servoPin,50)
+	#thisServo.start(0)
+	thisServo.ChangeDutyCycle(servoPositionStart)
+	time.sleep(1)
+	thisServo.ChangeDutyCycle(0)
+	print("[INFO] Initialize complete")
+	
 
+def servoTrigger():
+	print("[INFO] Servo Triggered. Pin:",servoPin)
+	print("servoPositionEnd:",servoPositionEnd)
+	print("servoPositionStart:",servoPositionStart)
+	#thisServo = GPIO.PWM(servoPin,50)
+	#thisServo.start(0)
+	time.sleep(.5)
+	print("PULLING trigger")
+	thisServo.ChangeDutyCycle(servoPositionEnd)
+	time.sleep(3.0)
+	print ("Releasing trigger")
+	thisServo.ChangeDutyCycle(servoPositionStart)
+	time.sleep(3.0)
+	thisServo.ChangeDutyCycle(0)
+	time.sleep(3)
+	#thisServo.stop()
+
+
+
+servoInitialize()
+
+servoTrigger()
+thisServo.stop()
+GPIO.cleanup()
+quit()
+print("past the end")
 
 # filter warnings, load the configuration
 warnings.filterwarnings("ignore")
@@ -209,5 +251,5 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 
 		# if the `q` key is pressed, break from the loop
 		if key == ord("q"):
-			theServo.cleanup()
+			GPIO.cleanup()
 			break

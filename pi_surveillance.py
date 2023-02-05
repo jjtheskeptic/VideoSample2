@@ -14,8 +14,8 @@ import json
 import time
 import cv2
 import os
-import threading
-from multiprocessing import Process #https://blog.devgenius.io/why-is-multi-threaded-python-so-slow-f032757f72dc
+#import threading
+#from multiprocessing import Process #https://blog.devgenius.io/why-is-multi-threaded-python-so-slow-f032757f72dc
 
 # https://learn.microsoft.com/en-us/python/api/overview/azure/cognitiveservices-vision-computervision-readme?view=azure-python
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
@@ -24,7 +24,8 @@ from msrest.authentication import CognitiveServicesCredentials
 import http.client, urllib.request, urllib.parse, urllib.error, base64
 #Python 3.11.1
 
-theServo=Servox(11)
+theServo=Servox(17)
+
 
 
 # filter warnings, load the configuration
@@ -149,9 +150,6 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					pythonObj=json.loads(responseData)
 					tags=pythonObj["tagsResult"]
 					detectionText=""
-				#### TESTING
-					#hasCat=True
-				#### TESTING
 					for object in tags["values"]:		
 						print(object["name"], object["confidence"])						
 						if ((object["name"] in detectionTags) and (object["confidence"] > conf["confidence_threshold"])):								
@@ -171,28 +169,28 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						# #try this: https://www.etutorialspoint.com/index.php/320-how-to-capture-a-video-in-python-opencv-and-save
 						#The codec's seem to be here - not sure if needed or not: https://github.com/cisco/openh264/releases
 						
-						video_output=cv2.VideoWriter(videoFilePath,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),30, tuple(conf["resolution"]))
+						video_output=cv2.VideoWriter(videoFilePath,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),50, tuple(conf["resolution"]))
 						servoTriggered=False
-						servoThread=threading.Thread(target=theServo.trigger()) #get the thread ready to start, hopefully
 						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
 							textOutputPixelY=20
 							frame_raw=vs.read() 
 							cv2.putText(frame_raw, "{}".format(startTimeString), (10,10),
 									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-							for object in tags["values"]:	#print the objects detected to the frame											
-								detectionText=object["name"]+":"+str(round(object["confidence"],2))+"; "
-								cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
-									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-								textOutputPixelY+=15
+							#for object in tags["values"]:	#print the objects detected to the frame											
+							#	detectionText=object["name"]+":"+str(round(object["confidence"],2))+"; "
+							#	cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
+							#		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+							#	textOutputPixelY+=15
 							video_output.write(frame_raw)
-							#try to start the servo on a separate thread so it doesn't interrupt recording the video
-							#also record 1 second before starting the servo to better capture the reaction
-							if (servoTriggered==False) and ((datetime.datetime.now()-captureStartTime).seconds) > 1:
+							if (servoTriggered==False) and ((datetime.datetime.now()-captureStartTime).seconds) > .5:
 								servoTriggered=True
-								#servoThread=threading.Thread(target=theServo.trigger)
-								servoThread.start()
+								theServo.trigger()
+							if (servoTriggered==True) and ((datetime.datetime.now()-captureStartTime).seconds) > 1.5:								
+								theServo.stopMotion()
 
 						print("[INFO] Video capture stopped: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
+						video_output.release()
+						theServo.resetPosition()
 #### END AZURE					
 				except Exception as e:
 					print("[ErrNo {0}] {1}".format("error", e))

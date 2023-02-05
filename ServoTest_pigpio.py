@@ -1,13 +1,41 @@
 # info from: https://www.section.io/engineering-education/how-to-control-a-servo-motor-using-a-raspberry-pi-3
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+from gpiozero.pins.pigpio import PiGPIOFactory
+from gpiozero import Servo
 import time
 from time import sleep
 #pigpio : http://abyz.me.uk/rpi/pigpio/download.html
 #start at boot: https://www.instructables.com/Raspberry-Pi-Remote-GPIO/
+# enable start at boot: sudo systemctl enable pigpiod
+# start immediately:    sudo systemctl start pigpiod 
+#disable start at boot: sudo systemctl disable pigpiod
+# stop immediately:     sudo systemctl stop pigpiod
+#Run it manually from terminal:
+#    sudo pigpiod # start pigpio daemon
+#
+#    pigs s 18 1000 # counterclockwise
+#    pigs s 18 1500 # centre
+#    pigs s 18 2000 # clockwise#
+#
+#    pigs s 18 0 # switch servo pulses off
 
+#kill: sudo killall pigpiod
+#see if running: ps aux | grep pigpiod
+#
+
+factory=PiGPIOFactory(host='raspberrypi.local')
+
+#servo = Servo(17,min_pulse_width=0.8/1000, max_pulse_width=2.2/1000,pin_factory=factory)
+servo=Servo(17,pin_factory=factory)
+
+servo.min()
+sleep(2)
+servo.max()
+sleep(2)
+servo.min()
 
 def servoTest():    
-    servoPin=17
+    servoPin=11
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(servoPin,GPIO.OUT)
     servo = GPIO.PWM(servoPin,50)
@@ -67,7 +95,7 @@ def GPIOTest():
         sleep(offTime) 
         blinks+=1
 
-print ("started")
+#print ("started")
 #GPIOTest()
-servoTest()
+#servoTest()
 print("done")

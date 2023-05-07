@@ -24,7 +24,7 @@ def servoTest():
 
     print ("Rotating")
     duty = 2
-    while duty <= 12:
+    while duty <= 2: #12:
         print("  ",duty)
         servo.ChangeDutyCycle(duty)
         time.sleep(1)
@@ -33,13 +33,13 @@ def servoTest():
         duty = duty + 1
         
     print("set to 8")
-    servo.ChangeDutyCycle(12)
-    time.sleep(2)
+    servo.ChangeDutyCycle(8)
+    time.sleep(5)
     print("set to 2")
     servo.ChangeDutyCycle(2)
-    time.sleep(2)
+    time.sleep(5)
     print ("Turning back to 0 degrees")
-    servo.ChangeDutyCycle(2)
+    servo.ChangeDutyCycle(12)
     time.sleep(0.5)
     
 

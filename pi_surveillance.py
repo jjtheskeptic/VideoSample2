@@ -147,7 +147,10 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					azureSeconds=(azureEndTime-azureStartTime).seconds
 					print("[INFO]:upload time in seconds",azureSeconds,datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 					conn.close()		
+					print("after conn.close")
 					pythonObj=json.loads(responseData)
+					print (responseData)
+					print("pythonObj: ", pythonObj["tagsResult"])
 					tags=pythonObj["tagsResult"]
 					detectionText=""
 					for object in tags["values"]:		
@@ -162,7 +165,8 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						
 						print("[INFO] Start Video Capture: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 						captureStartTime = datetime.datetime.now()		
-						startTimeString = captureStartTime.strftime("%A %d %B %Y %I_%M_%S%p")	
+						startTimeString = captureStartTime.strftime("%A %d %B %Y %I_%M_%S%p")
+						servoTriggerTimeString=""
 						
 						videoFileName="/ImageFiles/"+datetime.datetime.now().strftime(filenameDateFormatString)+".avi"	
 						videoFilePath="{0}{1}".format(dir_path,videoFileName)		
@@ -171,16 +175,26 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						
 						video_output=cv2.VideoWriter(videoFilePath,cv2.VideoWriter_fourcc('X', 'V', 'I', 'D'),50, tuple(conf["resolution"]))
 						servoTriggered=False
+						startTimeCaptured=False
 						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
-							textOutputPixelY=20
+							textOutputPixelY=10
 							frame_raw=vs.read() 
-							cv2.putText(frame_raw, "{}".format(startTimeString), (10,10),
+							cv2.putText(frame_raw, "{}".format(startTimeString), (10,textOutputPixelY),
 									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-							#for object in tags["values"]:	#print the objects detected to the frame											
-							#	detectionText=object["name"]+":"+str(round(object["confidence"],2))+"; "
-							#	cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
-							#		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-							#	textOutputPixelY+=15
+							textOutputPixelY+=10
+							if (startTimeCaptured == False):
+								startTimeCaptured=True
+								servoTriggerStartTime = datetime.datetime.now()		
+								servoTriggerTimeString = servoTriggerStartTime.strftime("%A %d %B %Y %I_%M_%S%p")
+							cv2.putText(frame_raw, "{}".format(servoTriggerStartTimeString), (10,textOutputPixelY),
+									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+							textOutputPixelY+=10
+							
+							for object in tags["values"]:	#print the objects detected to the frame											
+								detectionText=object["name"]+":"+str(round(object["confidence"],2))+"; "
+								cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
+									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+								textOutputPixelY+=15
 							video_output.write(frame_raw)
 							if (servoTriggered==False) and ((datetime.datetime.now()-captureStartTime).seconds) > .5:
 								servoTriggered=True

@@ -104,6 +104,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 		if cv2.contourArea(c) < conf["min_area"]:
 			continue
 
+		contourArea=cv2.contourArea(c)
 		# compute the bounding box for the contour, draw it on the frame,
 		# and update the text
 		(x, y, w, h) = cv2.boundingRect(c)
@@ -179,7 +180,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
 							textOutputPixelY=10
 							frame_raw=vs.read() 
-							cv2.putText(frame_raw, "{}".format(startTimeString), (10,textOutputPixelY),
+							cv2.putText(frame_raw, "{}".format(startTimeString+" ContourArea: "+contourArea), (10,textOutputPixelY),
 									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 							textOutputPixelY+=10
 							if (startTimeCaptured == False):

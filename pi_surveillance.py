@@ -128,6 +128,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 
 			# check to see if the number of frames with consistent motion is high enough
 			if motionCounter >= conf["min_motion_frames"]:
+				motionCount=0 #reset
 				print("[INFO] - MOTION DETECTED-"+datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p")) 
                 # write the image to temporary file
 				t = TempImage()
@@ -160,10 +161,10 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							print(object["name"], object["confidence"])									
 							hasCat=True
 							detectionText+=object["name"]+":"+str(round(object["confidence"],2))+"; "
-					# if hasCat == False:  #Delete the temp image if desired object not detected
-					#	t.cleanup()
+
+					if hasCat == False:  #Delete the temp image if desired object not detected
+						t.cleanup()
 					else:
-						
 						print("[INFO] Start Video Capture: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 						captureStartTime = datetime.datetime.now()		
 						startTimeString = captureStartTime.strftime("%A %d %B %Y %I_%M_%S%p")

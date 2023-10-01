@@ -2,6 +2,7 @@
 import RPi.GPIO as GPIO
 import time
 from time import sleep
+import datetime
 #DutyCycle values:     
 #  0 is no instruction   
 #  2 is 0 degrees

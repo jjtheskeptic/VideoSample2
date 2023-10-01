@@ -6,6 +6,7 @@
 	"camera_warmup_time": 2.5,
 	"delta_thresh": 5,
 	"resolution": [640, 480],
+	"resolutionX": [1024, 768],
 	"min_area": 1000,
 	"video_recording_seconds":10,
 	"trigger_objects":["cat","kitty","kitten","felidae"], 

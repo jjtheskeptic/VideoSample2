@@ -150,8 +150,8 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 					conn.close()		
 					print("after conn.close")
 					pythonObj=json.loads(responseData)
-					print (responseData)
-					print("pythonObj: ", pythonObj["tagsResult"])
+					# print (responseData)
+					# print("pythonObj: ", pythonObj["tagsResult"])
 					tags=pythonObj["tagsResult"]
 					detectionText=""
 					for object in tags["values"]:		
@@ -160,8 +160,8 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							print(object["name"], object["confidence"])									
 							hasCat=True
 							detectionText+=object["name"]+":"+str(round(object["confidence"],2))+"; "
-					if hasCat == False:  #Delete the temp image if desired object not detected
-						t.cleanup()
+					# if hasCat == False:  #Delete the temp image if desired object not detected
+					#	t.cleanup()
 					else:
 						
 						print("[INFO] Start Video Capture: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
@@ -180,14 +180,14 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 						while  ((datetime.datetime.now()-captureStartTime).seconds < conf["video_recording_seconds"]) :
 							textOutputPixelY=10
 							frame_raw=vs.read() 
-							cv2.putText(frame_raw, "{}".format(startTimeString+" ContourArea: "+contourArea), (10,textOutputPixelY),
+							cv2.putText(frame_raw, "{}".format(startTimeString+" ContourArea: "+"{:.0f}".format(contourArea)), (10,textOutputPixelY),
 									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 							textOutputPixelY+=10
 							if (startTimeCaptured == False):
 								startTimeCaptured=True
 								servoTriggerStartTime = datetime.datetime.now()		
 								servoTriggerTimeString = servoTriggerStartTime.strftime("%A %d %B %Y %I_%M_%S%p")
-							cv2.putText(frame_raw, "{}".format(servoTriggerStartTimeString), (10,textOutputPixelY),
+							cv2.putText(frame_raw, "{}".format(servoTriggerTimeString), (10,textOutputPixelY),
 									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 							textOutputPixelY+=10
 							
@@ -202,6 +202,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 								theServo.trigger()
 							if (servoTriggered==True) and ((datetime.datetime.now()-captureStartTime).seconds) > 1.5:								
 								theServo.stopMotion()
+								servoTriggered=False
 
 						print("[INFO] Video capture stopped: ",datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p"))
 						video_output.release()

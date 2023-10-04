@@ -127,7 +127,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 			detectionTags=conf["trigger_objects"]
 
 			# check to see if the number of frames with consistent motion is high enough
-			if motionCounter >= conf["min_motion_frames"]:
+			if (motionCounter >= conf["min_motion_frames"]) and (contourArea<6000):  #contourArea added 10/4
 				motionCount=0 #reset
 				print("[INFO] - MOTION DETECTED-"+datetime.datetime.now().strftime("%A %d %B %Y %I_%M_%S%p")) 
                 # write the image to temporary file

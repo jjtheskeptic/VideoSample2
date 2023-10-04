@@ -32,7 +32,7 @@ class Servox:
         GPIO.cleanup()
 
     def trigger(self):
-        print("[INFO] Servo Triggered")
+        print("[Servo] Servo Triggered")
         self.thisServo.ChangeDutyCycle(self.positionEnd)
         #time.sleep(0.5)
         #self.thisServo.ChangeDutyCycle(self.positionStart)
@@ -40,7 +40,7 @@ class Servox:
         #self.thisServo.ChangeDutyCycle(0)
 
     def resetPosition(self):
-        print("[INFO] Servo reset positionTriggered")
+        print("[Servo] Servo reset positionTriggered")
         self.thisServo.ChangeDutyCycle(self.positionStart)
         time.sleep(0.5)
         self.thisServo.ChangeDutyCycle(0)

@@ -114,7 +114,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 	# draw the text and timestamp on the frame
 	ts = timestamp.strftime("%A %d %B %Y %I:%M:%S%p")
 	cv2.putText(frame, "Room Status: {}".format(text), (10, 20),
-		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 	cv2.putText(frame, ts, (10, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX,
 		0.35, (0, 0, 255), 1)
         # check to see if the room is occupied
@@ -182,20 +182,20 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							textOutputPixelY=10
 							frame_raw=vs.read() 
 							cv2.putText(frame_raw, "{}".format(startTimeString+" ContourArea: "+"{:.0f}".format(contourArea)), (10,textOutputPixelY),
-									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-							textOutputPixelY+=10
+									cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+							textOutputPixelY+=15
 							if (startTimeCaptured == False):
 								startTimeCaptured=True
 								servoTriggerStartTime = datetime.datetime.now()		
 								servoTriggerTimeString = servoTriggerStartTime.strftime("%A %d %B %Y %I_%M_%S%p")
-							cv2.putText(frame_raw, "{}".format(servoTriggerTimeString), (10,textOutputPixelY),
-									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-							textOutputPixelY+=10
+							#cv2.putText(frame_raw, "{}".format(servoTriggerTimeString), (10,textOutputPixelY),
+							#		cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+							#textOutputPixelY+=10
 							
 							for object in tags["values"]:	#print the objects detected to the frame											
 								detectionText=object["name"]+":"+str(round(object["confidence"],2))+"; "
 								cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
-									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+									cv2.FONT_HERSHEY_SIMPLEX, 0.35 (0, 0, 255), 1)
 								textOutputPixelY+=15
 							video_output.write(frame_raw)
 							if (servoTriggered==False) and ((datetime.datetime.now()-captureStartTime).seconds) > .5:

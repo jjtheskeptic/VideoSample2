@@ -182,7 +182,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							textOutputPixelY=10
 							frame_raw=vs.read() 
 							cv2.putText(frame_raw, "{}".format(startTimeString+" ContourArea: "+"{:.0f}".format(contourArea)), (10,textOutputPixelY),
-									cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 0, 255), 1)
+									cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 							textOutputPixelY+=15
 							if (startTimeCaptured == False):
 								startTimeCaptured=True
@@ -194,8 +194,7 @@ while True: #for f in camera.capture_continuous(rawCapture, format="bgr", use_vi
 							
 							for object in tags["values"]:	#print the objects detected to the frame											
 								detectionText=object["name"]+":"+str(round(object["confidence"],2))+"; "
-								cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),
-									cv2.FONT_HERSHEY_SIMPLEX, 0.35 (0, 0, 255), 1)
+								cv2.putText(frame_raw, "{}".format(detectionText), (10,textOutputPixelY),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 								textOutputPixelY+=15
 							video_output.write(frame_raw)
 							if (servoTriggered==False) and ((datetime.datetime.now()-captureStartTime).seconds) > .5:
